@@ -5,3 +5,4 @@
     - Display Project Detail by ID work
     - Delete Function Work
     - Edit page by id is work
+    - Edit function work

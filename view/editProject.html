@@ -54,11 +54,11 @@
                 <div class="mb-3 d-flex justify-content-between">
                     <div class="w-50 me-2">
                         <label for="start-date" class="form-label mb-0">Start Date</label>
-                        <input type="date" class="form-control shadow-sm rounded" id="start-date" name="start-date" value="{{ .Projects.Startdate }}">
+                        <input type="date" class="form-control shadow-sm rounded" id="start-date" name="start-date" value="{{ .Projects.Startdate.Format "2006-01-02" }}">
                     </div>
                     <div class="w-50">
                         <label for="end-date" class="form-label mb-0">End Date</label>
-                        <input type="date" class="form-control shadow-sm rounded" id="end-date" name="end-date" value="{{ .Projects.Enddate }}">
+                        <input type="date" class="form-control shadow-sm rounded" id="end-date" name="end-date" value="{{ .Projects.Enddate.Format "2006-01-02" }}">
                     </div>
                 </div>
                 <div class="mb-3">

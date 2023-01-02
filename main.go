@@ -32,7 +32,7 @@ func main() {
 	route.HandleFunc("/project/{id}", detailProject).Methods("GET")
 	//Update
 	route.HandleFunc("/editProject/{id}", editProject).Methods("GET")
-	// route.HandleFunc("/updateProject/{id}" , updateProject).Methods("POST")
+	route.HandleFunc("/updateProject/{id}" , updateProject).Methods("POST")
 	//Delete
 	route.HandleFunc("/deleteProject/{id}", deleteProject).Methods("GET")
 
@@ -234,62 +234,31 @@ func editProject(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, dataEdit)
 }
 
-// func updateProject(w http.ResponseWriter, r *http.Request) {
-// 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
-// 	err := r.ParseMultipartForm(10485760) // menggunakan r.ParseMultipartForm karena mengizinkan pengiriman file beda dengan r.ParseForm yang tidak mengizinkan pengiriman gambar
-// 	// 10485760 itu parameter untuk ukuran batas file nya dalam satuan byte, jadi batas ukuran file yang diterima aku isi 10485760 byte atau 10 mb
+func updateProject(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(10485760)
 
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	projectname := r.PostForm.Get("project-name")
-// 	startDate := r.PostForm.Get("start-date")
-// 	endDate := r.PostForm.Get("end-date")
-// 	description := r.PostForm.Get("description")
-// 	technologies := r.Form["technologies"] // pakai r.Form karena ingin menangkap query string
+	projectname := r.PostForm.Get("project-name")
+	description := r.PostForm.Get("description")
+	technologies := r.Form["technologies"] // pakai r.Form karena ingin menangkap query string
 
+	const timeFormat = "2006-01-02"
+	startDate, _:= time.Parse(timeFormat, r.PostForm.Get("start-date"))
+	endDate, _:= time.Parse(timeFormat, r.PostForm.Get("end-date"))
+	ID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-// 	// Duration Start
-// 	const timeFormat = "2006-01-02" // Mendeklarasikan format tanggal
-// 	timeStartDate, _:= time.Parse(timeFormat, startDate) //Mengubah format tanggal start date sesuai dengan const timeFormat
-// 	timeEndDate, _:= time.Parse(timeFormat, endDate) //Mengubah format tanggal end date sesuai dengan const timeFormat
+	_, insertRow := connection.Conn.Exec(context.Background(), "UPDATE tb_projects SET project_name = $1, start_date = $2, end_date = $3, description = $4, technologies = $5 WHERE id = $6", projectname, startDate, endDate, description, technologies, ID)
+	if insertRow != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Message: " + err.Error()))
+		return
+	}
 
-// 	// Hitung jarak antara start date dan end date hasilnya akan menjadi milisecond
-// 	distance := timeEndDate.Sub(timeStartDate)
-
-// 	//Ubah milisecond menjadi bulan, minggu dan hari
-// 	monthDistance := int(distance.Hours() / 24 / 30)
-// 	weekDistance := int(distance.Hours() / 24 / 7)
-// 	daysDistance := int(distance.Hours() / 24)
-
-// 	// variable buat menampung durasi yang sudah diolah
-// 	var duration string
-// 	// pengkondisian yang akan mengirimkan durasi yang sudah diolah
-// 	if monthDistance >= 1 {
-// 		duration = strconv.Itoa(monthDistance) + " months"
-// 	} else if monthDistance < 1 && weekDistance >= 1 {
-// 		duration = strconv.Itoa(weekDistance) + " weeks"
-// 	} else if monthDistance < 1 && daysDistance >= 0 {
-// 		duration = strconv.Itoa(daysDistance) + " days"
-// 	} else {
-// 		duration = "0 days"
-// 	}
-// 	// Duration End
-
-
-// 	var newData = dataReceive{
-// 		Projectname: projectname,
-// 		Description: description,
-// 		Technologies: technologies,
-// 		Startdate: startDate,
-// 		Enddate: endDate,
-// 		Duration: duration,
-// 	} 
-
-// 	dataSubmit[id] = newData
-// 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
-// }
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
 
 func contactPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
