@@ -29,7 +29,7 @@ func main() {
 	route.HandleFunc("/project", projectPage).Methods("GET")
 	route.HandleFunc("/project", addProject).Methods("POST")
 	//Read
-	// route.HandleFunc("/project/{id}", detailProject).Methods("GET")
+	route.HandleFunc("/project/{id}", detailProject).Methods("GET")
 	//Update
 	// route.HandleFunc("/editProject/{id}", editProject).Methods("GET")
 	// route.HandleFunc("/updateProject/{id}" , updateProject).Methods("POST")
@@ -160,41 +160,39 @@ func addProject(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
-// func detailProject(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+func detailProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-// 	tmpl, err := template.ParseFiles("view/project-detail.html")
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		w.Write([]byte("Message : " + err.Error()))
-// 		return
-// 	}
+	tmpl, err := template.ParseFiles("view/project-detail.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Message : " + err.Error()))
+		return
+	}
 
-// 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	ID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-// 	var dataProject = dataReceive{}
+	var resultData = dataReceive{}
 
-// 	for index, data := range dataSubmit {
-// 		if index == id {
-// 			dataProject = dataReceive{
-// 				ID: id,
-// 				Projectname: data.Projectname,
-// 				Startdate: data.Startdate,
-// 				Enddate: data.Enddate,
-// 				Duration: data.Duration,
-// 				Description: data.Description,
-// 				Technologies: data.Technologies,
-// 			}
-// 		}
-// 	}
+	err = connection.Conn.QueryRow(context.Background(), "SELECT * FROM tb_projects WHERE id=$1", ID).Scan(&resultData.ID, &resultData.Projectname, &resultData.Startdate, &resultData.Enddate, &resultData.Description, &resultData.Technologies)
 
-// 	detailProject := map[string]interface{} {
-// 		"Projects": dataProject,
-// 	}
+	resultData.Duration = countduration(resultData.Startdate, resultData.Enddate)
 
-// 	w.WriteHeader(http.StatusOK)
-// 	tmpl.Execute(w, detailProject)
-// }
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Message : " + err.Error()))
+		return
+	}
+
+	fmt.Println(resultData)
+
+	detailProject := map[string]interface{} {
+		"Projects": resultData,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	tmpl.Execute(w, detailProject)
+}
 
 // func deleteProject(w http.ResponseWriter, r *http.Request) {
 // 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
