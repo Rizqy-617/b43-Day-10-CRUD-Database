@@ -182,8 +182,6 @@ func detailProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(resultData)
-
 	detailProject := map[string]interface{} {
 		"Projects": resultData,
 	}
