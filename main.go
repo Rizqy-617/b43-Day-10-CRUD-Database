@@ -34,7 +34,7 @@ func main() {
 	// route.HandleFunc("/editProject/{id}", editProject).Methods("GET")
 	// route.HandleFunc("/updateProject/{id}" , updateProject).Methods("POST")
 	//Delete
-	// route.HandleFunc("/deleteProject/{id}", deleteProject).Methods("GET")
+	route.HandleFunc("/deleteProject/{id}", deleteProject).Methods("GET")
 
 	fmt.Println("Server running on port:8080")
 	http.ListenAndServe("localhost:8080", route)
@@ -72,7 +72,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		result = append(result, each)
 	}
 
-	fmt.Println(result)
 
 	dataCaller := map[string]interface{} {
 		"Projects": result,
@@ -194,13 +193,18 @@ func detailProject(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, detailProject)
 }
 
-// func deleteProject(w http.ResponseWriter, r *http.Request) {
-// 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+func deleteProject(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-// 	dataSubmit = append(dataSubmit[:id], dataSubmit[id+1:]...)
+	_, deleteRows := connection.Conn.Exec(context.Background(), "DELETE FROM tb_projects WHERE id=$1", id)
+	if deleteRows != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("message : " + deleteRows.Error()))
+        return
+	}
 
-// 	http.Redirect(w, r, "/", http.StatusFound)
-// }
+	http.Redirect(w, r, "/", http.StatusFound)
+}
 
 // func editProject(w http.ResponseWriter, r *http.Request) {
 // 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
