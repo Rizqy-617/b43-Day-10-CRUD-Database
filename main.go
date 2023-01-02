@@ -250,8 +250,8 @@ func updateProject(w http.ResponseWriter, r *http.Request) {
 	endDate, _:= time.Parse(timeFormat, r.PostForm.Get("end-date"))
 	ID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	_, insertRow := connection.Conn.Exec(context.Background(), "UPDATE tb_projects SET project_name = $1, start_date = $2, end_date = $3, description = $4, technologies = $5 WHERE id = $6", projectname, startDate, endDate, description, technologies, ID)
-	if insertRow != nil {
+	_, updateRow := connection.Conn.Exec(context.Background(), "UPDATE tb_projects SET project_name = $1, start_date = $2, end_date = $3, description = $4, technologies = $5 WHERE id = $6", projectname, startDate, endDate, description, technologies, ID)
+	if updateRow != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Message: " + err.Error()))
 		return
