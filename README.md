@@ -4,3 +4,4 @@
     - Change Project Detail
     - Display Project Detail by ID work
     - Delete Function Work
+    - Edit page by id is work

@@ -31,7 +31,7 @@ func main() {
 	//Read
 	route.HandleFunc("/project/{id}", detailProject).Methods("GET")
 	//Update
-	// route.HandleFunc("/editProject/{id}", editProject).Methods("GET")
+	route.HandleFunc("/editProject/{id}", editProject).Methods("GET")
 	// route.HandleFunc("/updateProject/{id}" , updateProject).Methods("POST")
 	//Delete
 	route.HandleFunc("/deleteProject/{id}", deleteProject).Methods("GET")
@@ -71,7 +71,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 		result = append(result, each)
 	}
-
 
 	dataCaller := map[string]interface{} {
 		"Projects": result,
@@ -206,40 +205,34 @@ func deleteProject(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-// func editProject(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+func editProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-// 	tmpl, err := template.ParseFiles("view/editProject.html")
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		w.Write([]byte("Message : " + err.Error()))
-// 		return
-// 	}
+	tmpl, err := template.ParseFiles("view/editProject.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Message : " + err.Error()))
+		return
+	}
 
-// 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	ID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-// 	var editData = dataReceive{}
+	var editData = dataReceive{}
 
-// 	for index, data := range dataSubmit {
-// 		if index == id{
-// 			editData = dataReceive{
-// 				ID: id,
-// 				Projectname: data.Projectname,
-// 				Startdate: data.Startdate,
-// 				Enddate: data.Enddate,
-// 				Duration: data.Duration,
-// 				Description: data.Description,
-// 				Technologies: data.Technologies,
-// 			}
-// 		}
-// 	}
+	err = connection.Conn.QueryRow(context.Background(), "SELECT * FROM tb_projects WHERE id=$1", ID).Scan(&editData.ID, &editData.Projectname, &editData.Startdate, &editData.Enddate, &editData.Description, &editData.Technologies)
 
-// 	dataEdit := map[string]interface{} {
-// 		"Projects": editData,
-// 	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Message : " + err.Error()))
+		return
+	}
 
-// 	tmpl.Execute(w, dataEdit)
-// }
+	dataEdit := map[string]interface{} {
+		"Projects": editData,
+	}
+
+	tmpl.Execute(w, dataEdit)
+}
 
 // func updateProject(w http.ResponseWriter, r *http.Request) {
 // 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
